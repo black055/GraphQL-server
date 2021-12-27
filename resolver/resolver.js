@@ -1,4 +1,6 @@
 const databaseAccess = require("../data/db.js");
+const { PubSub } = require("graphql-subscriptions");
+const pubsub = new PubSub();
 
 const resolver = {
   Book: {
@@ -18,7 +20,17 @@ const resolver = {
 
   Mutation: {
     createAuthor: (parent, params) => databaseAccess.addAuthor(params),
-    createBook: (parent, params) => databaseAccess.addBook(params),
+    createBook: async (parent, params) => {
+      const data = await databaseAccess.addBook(params);
+      pubsub.publish("NEW_BOOK", { newBook: data });
+      return data;
+    }
+  },
+
+  Subscription: {
+    newBook: {
+      subscribe: () => pubsub.asyncIterator(["NEW_BOOK"]),
+    },
   },
 };
 

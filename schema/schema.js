@@ -42,6 +42,10 @@ const typeDefs = gql`
       authorId: ID!
     ): Book
   }
+
+  type Subscription {
+    newBook: Book
+  }
 `;
 
 module.exports = typeDefs;
